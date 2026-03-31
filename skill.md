@@ -1,5 +1,5 @@
 ---
-name: analyzing-reading
+name: reading-analyst
 description: "Generates a structured 10-chapter reading intelligence report from personal reading records (Excel/CSV/text). Covers taste profiling with character keywords, 30-dimension knowledge radar (UNESCO + LCC framework), dual book recommendations (gap-filling + passion-deepening), evolution timeline, and creative value analysis. Use when the user provides a book list, reading log, or reading records and requests reading analysis, taste profiling, knowledge assessment, or book recommendations."
 ---
 
