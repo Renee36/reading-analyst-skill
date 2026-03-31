@@ -1,3 +1,9 @@
+---
+name: reading-analyst
+description: "reading analysis, reading report, book list analysis, taste profile, knowledge assessment — Generates a 10-chapter structured reading intelligence report from personal reading records (Excel/CSV/text). Covers 30-dimension knowledge radar, taste profiling, dual book recommendations, evolution timeline, and creative value analysis."
+allowed-tools: Read, Write, Glob, Grep, Bash
+---
+
 # Reading Analyst Report Skill
 
 ## Description
@@ -341,3 +347,14 @@ Before generating the report, verify the following:
 5. **Actionable**: Book recommendations split into "fill the gaps" and "deepen your passions" tracks, each with clear recommendation logic
 6. **Honest assessment**: Do not shy away from blank areas — honestly mark 1-point dimensions
 7. **Future-oriented**: Don't just analyze the past — answer "what value can this reading create"
+
+## Error Handling
+
+When encountering data issues, follow these graceful degradation rules:
+
+- **Fewer than 10 books**: Warn the user that some chapters will be thin, but still generate what's possible. Skip Ch5 (Evolution Timeline) and Ch8 (Insights) if data is insufficient.
+- **No ratings provided**: Skip Ch4 (Top-Rated Books) entirely. Generate Ch3 (Taste Profile) based on category patterns only, without rating evidence. Note the limitation explicitly.
+- **No year data provided**: Skip Ch5 (Evolution Timeline). Generate Ch1 (Overview) with totals only, no trend chart. Note the limitation explicitly.
+- **Unrecognizable format**: Ask the user to clarify. Provide an example of acceptable input format.
+- **Duplicate detection uncertainty**: When unsure if two entries are the same book (e.g., different editions, translated titles), list the ambiguous cases and ask the user to confirm before proceeding.
+- **Book count exceeds 500**: Warn that Ch10 (Appendix) will be very long. Suggest generating the main report (Ch1-Ch9) first, then Ch10 on request.
