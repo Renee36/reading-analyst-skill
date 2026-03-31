@@ -1,360 +1,167 @@
 ---
-name: reading-analyst
-description: "reading analysis, reading report, book list analysis, taste profile, knowledge assessment — Generates a 10-chapter structured reading intelligence report from personal reading records (Excel/CSV/text). Covers 30-dimension knowledge radar, taste profiling, dual book recommendations, evolution timeline, and creative value analysis."
-allowed-tools: Read, Write, Glob, Grep, Bash
+name: analyzing-reading
+description: "Generates a structured 10-chapter reading intelligence report from personal reading records (Excel/CSV/text). Covers taste profiling with character keywords, 30-dimension knowledge radar (UNESCO + LCC framework), dual book recommendations (gap-filling + passion-deepening), evolution timeline, and creative value analysis. Use when the user provides a book list, reading log, or reading records and requests reading analysis, taste profiling, knowledge assessment, or book recommendations."
 ---
 
-# Reading Analyst Report Skill
+# Reading Analyst Skill
 
-## Description
-From the user's reading records (Excel / CSV / text list), automatically extract book data and generate a structured personal reading analysis report (Markdown format). The report covers data statistics, taste profiling, knowledge network assessment, book recommendations, personalized insights, and creative value analysis.
+## Input requirements
 
-## Trigger Conditions
-Triggered when the user provides a reading list/book records and requests reading analysis, reading reports, taste profiling, or knowledge assessment.
+Accepts reading records in Excel, CSV, text list, or manually listed book titles.
 
-## Input Requirements
-The user should provide reading records in any of the following formats:
-- **Excel file**: containing fields such as title, category, completion status, rating (field names are flexibly recognized)
-- **CSV / text list**: at minimum containing book titles, ideally with categories and ratings
-- **Manual list**: directly listing book titles
+Key fields (collect as many as possible):
 
-Key fields (collect as many as possible, not all required):
-| Field | Description | Necessity |
-|-------|-------------|-----------|
-| Title | Book name | **Required** |
-| Year | Year read/planned | Strongly recommended |
-| Category | Book genre (e.g., self-help, fiction, professional) | Strongly recommended |
-| Status | Completed / Reading / Unread | Recommended |
-| Rating | User score | Recommended |
-| Notes | One-line review or key takeaway | Optional (enables deeper insights) |
+| Field | Necessity |
+|-------|-----------|
+| Title | **Required** |
+| Year read | Strongly recommended |
+| Category | Strongly recommended |
+| Completion status | Recommended |
+| Rating | Recommended |
+| Notes / one-line review | Optional (enables deeper insights) |
 
-## Data Processing Pipeline
+## Data processing workflow
 
-### Step 1: Data Extraction & Cleaning
-1. Read all sheets/data sources, identify header rows (field names may be in different rows)
-2. Note that column structures may differ across year sheets; adapt per sheet
-3. Only extract rows where the title begins with a book marker (e.g., 「《」for Chinese, or standard title formats)
-4. **Deduplication**: the same book may appear in multiple years (carried over if unfinished); use the earliest year marked "completed" as the definitive year to avoid double-counting
-5. Distinguish completed vs. unfinished books, tallying each separately
-
-### Step 2: Statistical Analysis
-Calculate the following metrics:
-- Total books read (after deduplication)
-- Annual reading volume distribution
-- Category distribution (count + percentage)
-- Rating statistics (number of rated books, average, highest, lowest)
-- Average rating per category
-
-### Step 3: Internal Consistency Pre-Check
-Before generating the report, build the following data indices to ensure all chapters reference the same data source:
-- **Top-rated books index**: list all perfect-score and high-score (e.g., ≥4.8) books with title, rating, category, year. This index must be referenced consistently in Chapter 3 (Taste Profile) and Chapter 4 (Top-Rated Books table).
-- **Annual statistics index**: books read per year; Chapter 1 trend chart and Chapter 5 evolution timeline must match.
-- **Category-dimension mapping table**: each book mapped to the 30 knowledge network dimensions, used for Chapter 6 ratings.
-
-### Step 4: Generate Report
-Output the complete Markdown report following the ten-chapter structure below.
-
----
-
-## Report Structure Template (Ten Chapters)
-
-### Chapter 1: Overview & Statistics
-- Time span, total books read, number of rated books, average score, number of categories covered
-- **Annual reading volume trend** (visualized with `█░` bar chart), example format:
+Copy this checklist and track progress:
 
 ```
-2022 ███████████████████████████ 27 ← strong comeback
-2023 ███████████████████████████ 27
-2024 ██████████████████████████████████░ 34
-2025 ██████████████████████████████████████████████████░ 50 ← peak
+Data Processing:
+- [ ] Step 1: Extract & clean data
+- [ ] Step 2: Statistical analysis
+- [ ] Step 3: Internal consistency pre-check
+- [ ] Step 4: Generate 10-chapter report
+- [ ] Step 5: Quality verification
 ```
 
-- One-sentence summary of the trend (e.g., "U-shaped curve — decline then rise, with 2022 as the turning point")
+### Step 1: Extract & clean data
+1. Read all sheets/data sources, adapt per-sheet column structures
+2. Extract valid book entries (title field must be present)
+3. **Deduplicate**: same book across multiple years → use earliest "completed" year
+4. Separate completed vs. unfinished books
 
-### Chapter 2: Reading Category Distribution
-- Table: Category | Count | Percentage | Notes
-- **Sorted by count in descending order**
-- Percentages should sum to approximately 100% (rounding tolerance ±2%)
-- Long-tail categories may be merged into an "Other" row with details noted
+### Step 2: Statistical analysis
+Calculate: total books read (deduplicated), annual volume distribution, category distribution (count + %), rating statistics (count, average, highest, lowest), average rating per category.
 
-### Chapter 3: Taste Profile
+### Step 3: Internal consistency pre-check
 
-Based on data, distill the reader's reading persona, including:
+**Build these indices BEFORE generating any chapter** — this prevents the most common error (cross-chapter data contradictions):
 
-#### Core Profile
-- **One-line summary** (e.g., "A rationally-driven self-improvement reader with humanistic warmth")
-- **Character keywords** (6-10 words), displayed in inline code format, e.g.:
-  `methodology enthusiast` `scientific aesthetics` `classicist` `action-oriented` `long-term thinker` `cross-cultural curiosity`
+- **Top-rated books index**: all books rated ≥4.8 with title, rating, category, year → used in Ch3 and Ch4
+- **Annual statistics index**: books per year → used in Ch1 and Ch5
+- **Category-dimension mapping**: each book → one of 30 knowledge dimensions → used in Ch6
 
-#### Taste Traits (3-5)
-Each trait must include:
-- **Trait name** (e.g., "Methodology Devotee", "Scientific Worldview")
-- **Specific evidence**: cite specific book titles and data (e.g., "the 'self-management' thread alone spans 15+ books")
-- **Rating evidence**: cite specific ratings (e.g., "Atomic Habits ★5, Peak Mind ★5"), **must match the Chapter 4 top-rated table exactly**
-- **Taste judgment**: summarize what this trait reveals about the reader's preferences
+### Step 4: Generate 10-chapter report
 
-**⚠ Data Consistency Requirement**: Any rating-related statement in the taste profile (e.g., "there are X books rated 5 stars, namely...") must first cross-reference the top-rated books index built in Step 3, ensuring the book list and count are perfectly consistent. This is the most common source of data errors.
+Follow the structure below. For Ch6 knowledge dimensions reference, see [DIMENSIONS.md](DIMENSIONS.md).
 
-### Chapter 4: Top-Rated Books
-- Table listing the 15-25 highest-rated books (covering down to ≥4.8)
-- Table columns: Rating | Title | Category | Year
-- **Sorted by rating descending**, then by year descending for ties
-- **Summary narrative** (2-3 paragraphs) answering:
-  - Which years do perfect-score books cluster in? What does this indicate?
-  - What types of books most often receive high ratings?
-  - Common qualities of top-rated books (e.g., evidence-based, strong narrative, paradigm-shifting)
-  - What do the top-rated books reveal about what the reader values most?
+### Step 5: Quality verification
 
-### Chapter 5: Reading Evolution Timeline
-- Divide reading history into phases (typically 3-6 phases)
-- Table: Phase Name | Years | Keywords | Description
-- Identify turning points and growth spurts
-- **Summary narrative** (2-3 paragraphs) answering:
-  - What is the migration path of reading interests? (e.g., professional skills → literary aesthetics → self-management → scientific cognition → classical humanities)
-  - What events or life stages triggered qualitative shifts?
-  - Looking at the entire evolution, where is the reader's reading headed?
-  - Predict the next likely reading phase
-
-### Chapter 6: Knowledge Network Panoramic Assessment
-
-**This is the core chapter of the report. It must comprehensively cover the entire human knowledge landscape, not limited to categories the user has already read.**
-
-#### Classification Logic
-
-Before the assessment, explain the 8 domains and 30 dimensions classification basis:
-
-> **Classification Framework**
->
-> This assessment uses a cross-reference framework of **UNESCO International Standard Classification of Education (ISCED)** and the **Library of Congress Classification (LCC)**, adapted for personal reading contexts:
->
-> | Domain | Classification Basis | Coverage |
-> |--------|---------------------|----------|
-> | I. Self-Growth & Life Skills | LCC BF (Applied Psychology) + L (Education) + practical living | Knowledge for personal effectiveness and daily life |
-> | II. Humanities & Literature | LCC P (Language & Literature) + UNESCO "Humanities" | Literary works by genre and region |
-> | III. Social Sciences | UNESCO "Social Sciences" + LCC H/J/K | Disciplines studying how human society operates |
-> | IV. Natural Sciences & Technology | UNESCO "Natural Sciences" + LCC Q/T | Disciplines studying the natural world and technology |
-> | V. History & Geography | LCC C/D/E/F/G | Time dimension (history) + spatial dimension (geography) |
-> | VI. Philosophy & Religion | LCC B (Philosophy/Religion) | Knowledge systems addressing ultimate questions |
-> | VII. Arts & Aesthetics | LCC N/M (Fine Arts / Music) + UNESCO "Arts" | Various forms of human aesthetic expression |
-> | VIII. Business & Career | LCC HB-HJ (Economics/Management) + professional skills | Knowledge for career development and business practice |
->
-> Each domain's dimension breakdown follows the **MECE principle** (Mutually Exclusive, Collectively Exhaustive), ensuring:
-> - Every book the user has read can be assigned to a dimension
-> - No major branch of human knowledge is omitted
-> - Blank areas are equally important as covered areas and must be assessed
-
-#### Assessment Dimensions Checklist (Complete)
-
-**I. Self-Growth & Life Skills** (8 dimensions)
-Self-Management & Habits / Brain Science & Cognition / Negotiation & Communication / Health & Body Management / Mind-Body-Spirit Practice / Personal Finance & Investing / Cooking & Food Culture / Home & Lifestyle Aesthetics
-
-**II. Humanities & Literature** (6 dimensions)
-Domestic Contemporary Literature / Foreign Classic Literature / Regional Specialty Literature (e.g., Japanese Literature, adapted to reader preference) / Science Fiction / Poetry & Essays / Drama & Screenwriting
-
-**III. Social Sciences** (7 dimensions)
-Psychology / Economics / Political Science & International Relations / Legal Literacy / Sociology & Anthropology / Gender Studies / Education Studies
-
-**IV. Natural Sciences & Technology** (6 dimensions)
-Biology & Evolution / Physics & Astronomy / Mathematics / Chemistry & Materials / Earth & Environmental Science / Computer Science & AI
-
-**V. History & Geography** (3 dimensions)
-World History / National History / Geography & Travel
-
-**VI. Philosophy & Religion** (3 dimensions)
-Western Philosophy / Eastern Philosophy / Religious Studies
-
-**VII. Arts & Aesthetics** (4 dimensions)
-Painting & Visual Arts / Music / Architecture & Design / Film & Media
-
-**VIII. Business & Career** (4 dimensions)
-Project Management / Business & Entrepreneurship / Leadership & Management / Writing & Expression
-
-> **Note**: The "Regional Specialty Literature" dimension can be renamed based on the reader's actual preference (e.g., if a reader heavily reads Japanese literature, name it "Japanese Literature").
-
-#### Assessment Format Per Dimension
-| Dimension | Rating (★1-5) | Representative Books | Assessment Notes |
-
-#### Rating Criteria
-- ★★★★★ (9-10 pts): Exceptional — systematic understanding with cross-validated multi-book coverage
-- ★★★★☆ (7-8 pts): Solid — multiple books read with reasonable depth
-- ★★★☆☆ (5-6 pts): Basic — several related books read
-- ★★☆☆☆ (2-4 pts): Weak — only sporadic exposure
-- ★☆☆☆☆ (1 pt): Blank — no relevant reading
-
-#### Sorting Rule
-**Within each domain, dimensions must be sorted by rating in descending order.** This lets the reader immediately see their strengths and weaknesses within each domain.
-
-#### Required Sub-Sections
-
-**A. Eight Domains × 30 Dimensions Detailed Assessment**
-- 8 domains grouped, one table per group
-- Dimensions within each group sorted by rating descending
-- Every dimension must have representative books (write "None" if blank) and assessment notes
-
-**B. Knowledge Network Panoramic Radar Chart (Text Version)**
-- Use `█░` bar chart to display all 30 dimensions on a 1-10 scale
-- Grouped by domain with separator lines between groups
-- Annotate extreme values (e.g., `← dominant`, `← blank`, `← growing`)
-- Example format:
-
-```
-═══════════════════════════════════════════════════════════
-  I. Self-Growth & Life Skills                    Score
-═══════════════════════════════════════════════════════════
-  Self-Management & Habits  ██████████ 10/10  ← dominant
-  Brain Science & Cognition ████████░░  8/10
-  Personal Finance          █░░░░░░░░░  1/10  ← blank
-───────────────────────────────────────────────────────────
-```
-
-**C. Gap Overview: Completely Blank Domains (1/10)**
-- Table: Blank Domain | Why It Matters | One Starter Book Recommendation
-- "Why It Matters" should connect to the reader's life context (e.g., "parent of two children", "working professional")
-
-**D. Summary**
-- Characterize the knowledge structure shape (e.g., "inverted-T", "lopsided", "balanced") with a one-sentence explanation
-- **30-dimension statistics**: how many dimensions are strengths (≥7), foundational (4-6), weak/blank (1-3), with percentages
-- Top 3 priority areas to fill + why
-
-### Chapter 7: Reading Recommendations: Book Lists & Pathways
-
-This chapter contains **two book lists** addressing different needs:
-
-#### Book List A: Filling the Gaps — Essential Knowledge (10 books)
-
-**Selection principle**: Prioritize coverage of domains rated 1 (blank) in Chapter 6; recommend at least 1 starter book per blank domain.
-
-| # | Title | Gap Filled | Recommendation Rationale (connection to reader's taste) |
-
-**Requirements**:
-- Design a reading path upfront (e.g., life essentials → social awareness → aesthetic expansion → world understanding)
-- Rationale must explain "why this book and not another" — connecting to the reader's existing preferences (e.g., "given your taste for evidence-based + narrative style" → recommend specific book)
-- If there are N blank domains, cover at least N (if >10, prioritize the 10 most important)
-- **Confirm the reader has not already read any recommended book**
-
-#### Book List B: Deepening Passions — Advanced Reading in Current Interests (10 books)
-
-**Selection principle**: Based on the reader's most active/highest-rated domains, recommend books that take existing knowledge "to the next level."
-
-| # | Title | Domain Deepened | Connection (how it links to books already read) |
-
-**Requirements**:
-- Each recommendation must explain which previously-read book it connects to, example format:
-  > "After reading Atomic Habits ★5 and Peak Mind ★5, this book offers Nobel Prize-level cognitive science explaining 'why your brain works the way it does'"
-- Cover the reader's 3-5 highest-rated domains
-- If the reader has a "white whale list" (books planned for years but never finished), include them with a note that "now is the perfect time"
-- **Confirm the reader has not already read any recommended book**
-
-### Chapter 8: Fascinating Insights
-
-Uncover 5-7 hidden discoveries in the data, drawing from angles such as:
-- **White whale books**: books that appear repeatedly over years but remain unfinished
-- **Turning points**: sudden shifts in reading volume/category/quality and their likely triggers
-- **Plan vs. reality**: patterns in the gap between annual reading goals and actual completions
-- **Review style**: what the reader's book reviews/notes reveal about their reading approach (do they "read" books or "use" books?)
-- **Cultural undercurrents**: hidden cultural preferences (e.g., a Japanese culture affinity, a national literature bias)
-- **Management style**: unique reading management methods (e.g., Gantt charts, person-day calculations)
-- **Volume leaps**: exponential reading growth from a specific year onward
-
-**Writing requirements**:
-- Every insight must be supported by **specific data and book titles** — no empty statements
-- Highlight key findings in **bold**
-- Number each insight with a subheading
-
-### Chapter 9: Creative Value of Your Reading
-
-This chapter answers a higher-order question: **What unique value can this reading accumulation create for the reader? How can it help others?**
-
-#### 9.1 Your Unique Knowledge Combination
-- List the reader's cross-domain knowledge intersections (using `A × B × C × D` format)
-- Analyze the rarity of this combination in the general population
-- Explain why the intersection of these domains produces unique perspectives (not just "you know a lot," but explaining the chemical reaction of knowledge stacking)
-
-#### 9.2 Potential Output Directions
-Based on reading accumulation, propose 3-5 specific knowledge output directions, each including:
-- **Direction name** (e.g., "Reading Management Through Project Management Methods")
-- **Why you can do it**: connection to existing knowledge
-- **Target audience**: specifically describe who would benefit
-- **Format**: book / course / column / community, etc.
-
-#### 9.3 How to Help More People
-- Which of the reader's experiences/methods/paths are replicable
-- What is the most impactful entry point for sharing (usually a transformation story, not a book list)
-- Who is the reader best positioned to help (combining their career, life roles)
-
-**Writing requirements**:
-- Must be based on data analysis from previous chapters — no speculation
-- Output direction suggestions must be specific and actionable — avoid vague statements like "you could do many things"
-- Connect to the reader's professional background and life roles (e.g., parent, professional)
-
-### Chapter 10: Appendix — Complete Book List (Optional)
-- List all completed books by year
-- Include: Year, Title, Category, Rating (if available)
-- This chapter can be lengthy; include based on user preference
-- If the book count is very large (>200), suggest the user export it separately as Excel/CSV
+Run the quality checklist at the end of this file before delivering.
 
 ---
 
-## Output Requirements
+## Report structure (10 chapters)
 
-1. **Format**: Markdown file (`.md`)
-2. **Language**: Match the language of the user's reading records (default to the language of the input data)
-3. **Save location**: Ask the user for their preferred save path; default to Desktop
-4. **File name format**: `{username}_Reading_Analysis_Report_{start_year}-{end_year}.md`
+### Ch1: Overview & Statistics
+- Time span, totals, rated book count, average score, category count
+- **Annual trend bar chart** using `█░` blocks, with one-sentence trend summary
+- Example: `2024 ██████████████████████████████████░ 34`
 
-## Quality Checklist
+### Ch2: Category Distribution
+- Table: Category | Count | % | Notes — sorted by count descending, sum ≈100%
 
-Before generating the report, verify the following:
+### Ch3: Taste Profile
+- **One-line persona** + **6-10 character keywords** in inline code (e.g., `methodology enthusiast` `long-term thinker`)
+- 3-5 taste traits, each with: trait name, specific book evidence, rating evidence (**must match Ch4 exactly**), taste judgment
+- ⚠ Cross-reference the top-rated books index before citing any rating data
 
-### Data Accuracy
-- [ ] Books are deduplicated — no book counted more than once
-- [ ] Annual statistics only include completed books
-- [ ] Category distribution percentages sum to approximately 100%
+### Ch4: Top-Rated Books
+- Table of 15-25 highest-rated books (≥4.8): Rating | Title | Category | Year — sorted by rating desc
+- 2-3 paragraph summary: year clustering patterns, high-score book qualities, what reader values most
 
-### Cross-Chapter Consistency (⚠ Most Common Error Source)
-- [ ] **Taste Profile (Ch3) rating references match the Top-Rated Books table (Ch4) exactly**
-  - Example: If Ch3 says "8 books rated 5 stars," then Ch4 must show exactly 8 five-star books
-  - Example: If Ch3 says "Book X ★5," then Ch4 must show that book with a 5-star rating
-- [ ] Annual reading trend (Ch1) matches evolution timeline (Ch5) year data
-- [ ] Knowledge network radar chart scores (Ch6-B) match detailed assessment tables (Ch6-A)
+### Ch5: Evolution Timeline
+- 3-6 reading phases table: Phase | Years | Keywords | Description
+- 2-3 paragraph summary: interest migration path, turning points, predicted next phase
 
-### Structural Completeness
-- [ ] Ch4 top-rated books table is followed by summary narrative paragraphs
-- [ ] Ch5 evolution timeline table is followed by summary narrative paragraphs
-- [ ] Ch6 includes classification logic explanation (UNESCO + LCC framework)
-- [ ] Ch6 covers all 30 dimensions, not just categories the user has read
-- [ ] **Ch6 dimensions within each domain are sorted by rating descending**
-- [ ] Ch6 blank domains (1 pt) are all identified with starter book recommendations
-- [ ] Ch6 summary includes 30-dimension statistics and priority fill directions
+### Ch6: Knowledge Network Assessment
 
-### Recommendation Quality
-- [ ] **Book List A (filling gaps) covers all 1-point blank domains**
-- [ ] Book List A includes a reading path design
-- [ ] **Book List B (deepening passions) explicitly connects each book to the reader's top-rated books**
-- [ ] All 20 recommended books are confirmed unread by the user
+**Core chapter — must cover the full human knowledge landscape, not just what the reader has read.**
 
-### Content Depth
-- [ ] Every insight (Ch8) is supported by specific book titles and data
-- [ ] Creative value (Ch9) output directions are specific and actionable with target audiences
-- [ ] Taste Profile (Ch3) includes 6-10 character keywords
+Uses 8 domains × 30 dimensions framework. For the complete dimension list, classification logic, and rating criteria, see [DIMENSIONS.md](DIMENSIONS.md).
 
-## Core Principles
+Required sub-sections:
+- **A. Detailed assessment**: 8 domain tables, dimensions sorted by rating desc, every dimension has representative books or "None"
+- **B. Radar chart**: `█░` bar chart for all 30 dimensions (1-10 scale), grouped by domain, annotate extremes (`← dominant`, `← blank`)
+- **C. Gap overview**: table of all blank domains (1/10) with "Why it matters" (connect to reader's life context) + starter book
+- **D. Summary**: knowledge structure shape label (e.g., "inverted-T"), 30-dimension stats (strengths/foundational/weak counts), top 3 priority fill directions
 
-1. **Comprehensiveness**: Knowledge assessment must cover the full human knowledge landscape; blank areas are as important as covered ones
-2. **Data-driven**: All conclusions must be backed by book data — no unfounded speculation
-3. **Internal consistency**: Data references across chapters must be consistent with no contradictions. Build unified data indices before generating the report
-4. **Personalization**: Taste profiles and insights must be specific to this individual reader — no template language
-5. **Actionable**: Book recommendations split into "fill the gaps" and "deepen your passions" tracks, each with clear recommendation logic
-6. **Honest assessment**: Do not shy away from blank areas — honestly mark 1-point dimensions
-7. **Future-oriented**: Don't just analyze the past — answer "what value can this reading create"
+### Ch7: Book Recommendations
 
-## Error Handling
+**Book List A — Filling Gaps (10 books)**:
+- Cover all Ch6 blank domains (1-point), design a reading path
+- Each book: why this one specifically, connected to reader's taste
+- **Confirm reader hasn't read it**
 
-When encountering data issues, follow these graceful degradation rules:
+**Book List B — Deepening Passions (10 books)**:
+- Based on reader's 3-5 highest-rated domains
+- Each book must explain connection to a specific high-rated book already read (e.g., "After reading X ★5, this book takes it further by...")
+- **Confirm reader hasn't read it**
 
-- **Fewer than 10 books**: Warn the user that some chapters will be thin, but still generate what's possible. Skip Ch5 (Evolution Timeline) and Ch8 (Insights) if data is insufficient.
-- **No ratings provided**: Skip Ch4 (Top-Rated Books) entirely. Generate Ch3 (Taste Profile) based on category patterns only, without rating evidence. Note the limitation explicitly.
-- **No year data provided**: Skip Ch5 (Evolution Timeline). Generate Ch1 (Overview) with totals only, no trend chart. Note the limitation explicitly.
-- **Unrecognizable format**: Ask the user to clarify. Provide an example of acceptable input format.
-- **Duplicate detection uncertainty**: When unsure if two entries are the same book (e.g., different editions, translated titles), list the ambiguous cases and ask the user to confirm before proceeding.
-- **Book count exceeds 500**: Warn that Ch10 (Appendix) will be very long. Suggest generating the main report (Ch1-Ch9) first, then Ch10 on request.
+### Ch8: Fascinating Insights
+- 5-7 data-driven discoveries (white whale books, turning points, plan vs. reality, cultural undercurrents, volume leaps)
+- Every insight backed by **specific book titles and data**
+
+### Ch9: Creative Value
+- **9.1 Unique knowledge combination**: cross-domain intersections in `A × B × C` format, rarity analysis
+- **9.2 Output directions**: 3-5 specific proposals (name, why you can do it, target audience, format)
+- **9.3 How to help others**: replicable methods, best entry point, target audience — connect to reader's career and life roles
+
+### Ch10: Appendix (Optional)
+- Complete book list by year. If >200 books, suggest separate export.
+
+---
+
+## Output requirements
+
+- **Format**: Markdown file (`.md`)
+- **Language**: match input data language
+- **Save path**: ask user, default to Desktop
+- **File name**: `{username}_Reading_Analysis_{start_year}-{end_year}.md`
+
+## Quality checklist
+
+```
+Quality Verification:
+- [ ] Books deduplicated, no double-counting
+- [ ] Category percentages sum ≈100%
+- [ ] Ch3 rating claims match Ch4 table exactly (most common error!)
+- [ ] Ch1 annual data matches Ch5 timeline
+- [ ] Ch6 radar scores match Ch6 detail tables
+- [ ] Ch6 covers all 30 dimensions, sorted by rating desc within each domain
+- [ ] Ch6 all blank domains identified with starter recommendations
+- [ ] Book List A covers all 1-point blank domains
+- [ ] Book List B connects each book to a specific high-rated book already read
+- [ ] All 20 recommended books confirmed unread
+- [ ] Ch3 has 6-10 character keywords
+- [ ] Ch8 every insight has specific book titles and data
+- [ ] Ch9 output directions are specific and actionable
+```
+
+## Core principles
+
+1. **Comprehensiveness**: knowledge assessment covers the full human knowledge landscape — blanks are as important as strengths
+2. **Data-driven**: all conclusions backed by book data, no speculation
+3. **Internal consistency**: build unified data indices before generating — no cross-chapter contradictions
+4. **Personalization**: taste profiles and insights must be specific to this reader, no template language
+5. **Actionable**: dual-track recommendations with clear logic per book
+6. **Honest**: do not shy away from blank areas
+7. **Future-oriented**: answer "what value can this reading create"
+
+## Error handling
+
+- **<10 books**: warn user, skip Ch5 and Ch8 if data insufficient
+- **No ratings**: skip Ch4, generate Ch3 from category patterns only, note limitation
+- **No years**: skip Ch5, Ch1 shows totals only without trend chart, note limitation
+- **Unrecognizable format**: ask user to clarify, provide example format
+- **Ambiguous duplicates** (different editions/translations): list ambiguous entries, ask user to confirm
+- **>500 books**: generate Ch1-Ch9 first, Ch10 on request
