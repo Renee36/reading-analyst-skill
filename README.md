@@ -87,13 +87,13 @@ mkdir -p ~/.claude/skills/reading-analyst
 ```bash
 # Download directly
 curl -o ~/.claude/skills/reading-analyst/skill.md \
-  https://raw.githubusercontent.com/renee-z/reading-analyst-skill/main/skill.md
+  https://raw.githubusercontent.com/Renee36/reading-analyst-skill/main/skill.md
 ```
 
 Or for Chinese version:
 ```bash
 curl -o ~/.claude/skills/reading-analyst/skill.md \
-  https://raw.githubusercontent.com/renee-z/reading-analyst-skill/main/skill_cn.md
+  https://raw.githubusercontent.com/Renee36/reading-analyst-skill/main/skill_cn.md
 ```
 
 **Step 3**: Use it!

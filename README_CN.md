@@ -87,13 +87,13 @@ mkdir -p ~/.claude/skills/reading-analyst
 ```bash
 # 中文版
 curl -o ~/.claude/skills/reading-analyst/skill.md \
-  https://raw.githubusercontent.com/renee-z/reading-analyst-skill/main/skill_cn.md
+  https://raw.githubusercontent.com/Renee36/reading-analyst-skill/main/skill_cn.md
 ```
 
 或英文版：
 ```bash
 curl -o ~/.claude/skills/reading-analyst/skill.md \
-  https://raw.githubusercontent.com/renee-z/reading-analyst-skill/main/skill.md
+  https://raw.githubusercontent.com/Renee36/reading-analyst-skill/main/skill.md
 ```
 
 **第 3 步**：使用！
